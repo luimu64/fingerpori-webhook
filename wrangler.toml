@@ -4,5 +4,5 @@ main = "src/index.ts"
 compatibility_date = "2024-05-12"
 compatibility_flags = ["nodejs_compat"]
 
-[vars]
-WEBHOOK_URL = "https://discord.com/api/webhooks/1239973566611591250/-3kj_-vJfLCPoUw5Ab9UwkiwvEeeUOyakNmD7ibmT4jb4KODujVLJhnfQe2p-kC0PBa2"
+[triggers]
+crons = ["0 4 * * *"]
