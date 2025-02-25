@@ -1,4 +1,5 @@
 const fetchNewStrip = async () => {
+	let response = "";
 	const fetchRes = await fetch(
 		"https://www.hs.fi/api/laneitems/39221/list/normal/290",
 		{
@@ -11,16 +12,11 @@ const fetchNewStrip = async () => {
 
 	const imageData = JSON.parse(fetchRes);
 
-	const firstImageUrl = imageData[0].picture.url.replace(
-		"WIDTH.EXT",
-		"1920.avif",
-	);
-
-	if (!firstImageUrl) {
-		throw new Error("Failed to fetch image URL");
+	if (imageData.length > 0) {
+		response = imageData[0].picture.url.replace("WIDTH.EXT", "1920.avif");
 	}
 
-	return firstImageUrl;
+	return response;
 };
 
 const message = async (url: string) => {
@@ -36,7 +32,7 @@ const message = async (url: string) => {
 
 const doTasks = async () => {
 	const strip = await fetchNewStrip();
-	await message(strip);
+	if (strip !== "") await message(strip);
 	return new Response(null, { status: 204 });
 };
 
