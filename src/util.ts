@@ -7,7 +7,6 @@ export const toTimestamp = (dateString: string, incorrectFormat?: boolean) => {
 	if (incorrectFormat) {
 		const [day, month, year] = dateSource.split(".");
 		dateSource = `${year}-${month}-${day}T00:00:00Z`;
-		console.log(dateSource);
 	}
 
 	const date = new Date(dateSource);
