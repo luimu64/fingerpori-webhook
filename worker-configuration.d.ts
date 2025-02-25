@@ -3,4 +3,5 @@
 export {};
 declare global {
 	const WEBHOOK_URL: string;
+	const HS_API_URL: string;
 }

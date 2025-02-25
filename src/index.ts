@@ -1,14 +1,6 @@
 const fetchNewStrip = async () => {
 	let response = "";
-	const fetchRes = await fetch(
-		"https://www.hs.fi/api/laneitems/39221/list/normal/290",
-		{
-			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.3",
-			},
-		},
-	).then((res) => res.text());
+	const fetchRes = await fetch(HS_API_URL).then((res) => res.text());
 
 	const imageData = JSON.parse(fetchRes);
 
@@ -31,9 +23,19 @@ const message = async (url: string) => {
 };
 
 const doTasks = async () => {
+	let status = 204;
+
+	//fetch the new comic strip from the API
 	const strip = await fetchNewStrip();
-	if (strip !== "") await message(strip);
-	return new Response(null, { status: 204 });
+	//check if the strip was fetched successfully
+	if (strip !== "") {
+		//send the strip url to the webhook
+		await message(strip);
+	} else {
+		console.error("Failed to fetch strip");
+		status = 500;
+	}
+	return new Response(null, { status: status });
 };
 
 addEventListener("scheduled", (event) => {
