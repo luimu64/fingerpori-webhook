@@ -1,41 +1,52 @@
-const fetchNewStrip = async () => {
-	let response = "";
-	const fetchRes = await fetch(HS_API_URL).then((res) => res.text());
-
-	const imageData = JSON.parse(fetchRes);
-
-	if (imageData.length > 0) {
-		response = imageData[0].picture.url.replace("WIDTH.EXT", "1920.avif");
-	}
-
-	return response;
-};
-
-const message = async (url: string) => {
-	await fetch(WEBHOOK_URL, {
-		method: "POST",
-		headers: {
-			method: "POST",
-			"content-type": "application/json",
-		},
-		body: JSON.stringify({ content: url }),
-	});
-};
+import { SourceType, type Strip } from "./types";
+import * as util from "./util";
+import { fetchSanoma } from "./sources/sanoma";
+import { fetchKeskisuomalainen } from "./sources/keskisuomalainen";
+import { fetchKaleva } from "./sources/kaleva";
+import { sites } from "./sites";
 
 const doTasks = async () => {
-	let status = 204;
+	// go through all the sources and fetch strip from each
+	const strips = await Promise.allSettled(
+		sites.map(async (site) => {
+			switch (site.type) {
+				case SourceType.sanoma:
+					return fetchSanoma(site);
+				case SourceType.keskisuomalainen:
+					return fetchKeskisuomalainen(site);
+				case SourceType.kaleva:
+					return fetchKaleva(site);
+			}
+		}),
+	);
 
-	//fetch the new comic strip from the API
-	const strip = await fetchNewStrip();
-	//check if the strip was fetched successfully
-	if (strip !== "") {
-		//send the strip url to the webhook
-		await message(strip);
-	} else {
-		console.error("Failed to fetch strip");
-		status = 500;
+	//Filter out rejected promises and print them. Then filter out null values.
+	const succeededStrips = strips
+		.map((promise): Strip | null => {
+			if (promise.status === "fulfilled") return promise.value;
+
+			console.error(promise.reason);
+			return null;
+		})
+		.filter((strip): strip is Strip => strip !== null);
+
+	for (const st of succeededStrips) {
+		const lastTimeFromDB = await SOURCE_TIMESTAMPS.get(st.source.name);
+
+		//matches first time runs when the database doesn't have last sent timestamp
+		if (lastTimeFromDB === null) {
+			await util.sendToWebhook(st.imageUrl);
+			await SOURCE_TIMESTAMPS.put(st.source.name, st.timestamp.toString());
+
+			//matches most of the time when the database has last sent
+			//timestamp and the strip is newer (+ converts to number)
+		} else if (st.timestamp > +lastTimeFromDB) {
+			await util.sendToWebhook(st.imageUrl);
+			await SOURCE_TIMESTAMPS.put(st.source.name, st.timestamp.toString());
+		}
 	}
-	return new Response(null, { status: status });
+
+	return new Response("", { status: 200 });
 };
 
 addEventListener("scheduled", (event) => {

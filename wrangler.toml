@@ -6,3 +6,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [triggers]
 crons = ["0 4 * * *"]
+
+[[kv_namespaces]]
+binding = "SOURCE_TIMESTAMPS"
+id = "cf1a4d54ca8a428d9bf92b923990adf7"

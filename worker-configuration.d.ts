@@ -2,6 +2,8 @@
 
 export {};
 declare global {
+	const SOURCE_TIMESTAMPS: KVNamespace;
 	const WEBHOOK_URL: string;
 	const HS_API_URL: string;
+	const SS_WWW_URL: string;
 }

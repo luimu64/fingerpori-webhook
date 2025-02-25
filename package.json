@@ -15,5 +15,8 @@
     "start": "wrangler dev",
     "test": "vitest",
     "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0"
   }
 }
