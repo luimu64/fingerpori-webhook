@@ -1,12 +1,12 @@
 #:schema node_modules/wrangler/config-schema.json
 name = "fingerpori-webhook"
 main = "src/index.ts"
-compatibility_date = "2024-05-12"
+compatibility_date = "2025-01-04"
 compatibility_flags = ["nodejs_compat"]
 
 [triggers]
 crons = ["0 4 * * *"]
 
 [[kv_namespaces]]
-binding = "SOURCE_TIMESTAMPS"
-id = "cf1a4d54ca8a428d9bf92b923990adf7"
+binding = "IMAGE_HASHES"
+id = "31ee75abe17e45af975d858909cfa2a9"

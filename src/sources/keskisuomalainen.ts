@@ -19,7 +19,7 @@ export const fetchKeskisuomalainen = async (source: Source) => {
 
 	if (stripElements.length > 0) {
 		response = {
-			timestamp: util.toTimestamp(
+			timestamp: util.date2Timestamp(
 				$(stripElements[0])
 					.find('time[class$="date__published"]')
 					.attr("datetime") || "",

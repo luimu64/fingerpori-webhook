@@ -10,8 +10,8 @@ export const fetchSanoma = async (source: Source) => {
 
 	if (imageData.length > 0) {
 		response = {
-			timestamp: util.toTimestamp(imageData[0].displayDate),
-			imageUrl: imageData[0].picture.url.replace("WIDTH.EXT", "1920.avif"),
+			timestamp: util.date2Timestamp(imageData[0].displayDate),
+			imageUrl: imageData[0].picture.url.replace("WIDTH.EXT", "1920.jpg"),
 			source: source,
 		};
 	} else {

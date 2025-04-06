@@ -5,7 +5,7 @@ import { fetchKeskisuomalainen } from "./sources/keskisuomalainen";
 import { fetchKaleva } from "./sources/kaleva";
 import { sites } from "./sites";
 
-const doTasks = async () => {
+const doTasks = async (env: Env) => {
 	// go through all the sources and fetch strip from each
 	const strips = await Promise.allSettled(
 		sites.map(async (site) => {
@@ -31,24 +31,21 @@ const doTasks = async () => {
 		.filter((strip): strip is Strip => strip !== null);
 
 	for (const st of succeededStrips) {
-		const lastTimeFromDB = await SOURCE_TIMESTAMPS.get(st.source.name);
+		const imageHash = await util.getImageHash(st.imageUrl);
+		const foundHash = await env.IMAGE_HASHES.get(imageHash);
 
-		//matches first time runs when the database doesn't have last sent timestamp
-		if (lastTimeFromDB === null) {
-			await util.sendToWebhook(st.imageUrl);
-			await SOURCE_TIMESTAMPS.put(st.source.name, st.timestamp.toString());
-
-			//matches most of the time when the database has last sent
-			//timestamp and the strip is newer (+ converts to number)
-		} else if (st.timestamp > +lastTimeFromDB) {
-			await util.sendToWebhook(st.imageUrl);
-			await SOURCE_TIMESTAMPS.put(st.source.name, st.timestamp.toString());
+		//check whether image has already been sent
+		if (foundHash === null) {
+			await util.sendToWebhook(st, env.WEBHOOK_URL);
+			await env.IMAGE_HASHES.put(imageHash, st.timestamp.toString());
 		}
 	}
 
 	return new Response("", { status: 200 });
 };
 
-addEventListener("scheduled", (event) => {
-	event.waitUntil(doTasks());
-});
+export default {
+	async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext) {
+		ctx.waitUntil(doTasks(env));
+	},
+};

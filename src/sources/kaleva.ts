@@ -20,7 +20,7 @@ export const fetchKaleva = async (source: Source) => {
 
 	if (imgElements.length > 0) {
 		response = {
-			timestamp: util.toTimestamp(
+			timestamp: util.date2Timestamp(
 				$(dateElements[0]).text().trim().split(" ")[1],
 				true,
 			),
