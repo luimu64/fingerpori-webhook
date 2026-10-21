@@ -1,6 +1,9 @@
 import { Jimp } from "jimp";
 import type { Strip } from "./types";
 
+const browserUserAgent =
+	"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
 const date2Timestamp = (dateString: string, incorrectFormat?: boolean) => {
 	let dateSource = dateString;
 
@@ -45,11 +48,20 @@ const sendToWebhook = async (strip: Strip, webhook: string) => {
 };
 
 const getImageHash = async (url: string) => {
-	const image = await Jimp.read(url);
+	// fetch explicitly instead of letting Jimp resolve the URL so that upstream
+	// failures surface as readable errors rather than opaque decode errors.
+	const res = await fetch(url, {
+		headers: { "User-Agent": browserUserAgent },
+	});
+
+	if (!res.ok) throw new Error(`Failed to fetch image ${url}: ${res.status}`);
+
+	const image = await Jimp.read(Buffer.from(await res.arrayBuffer()));
 	return image.hash(64);
 };
 
 export {
+	browserUserAgent,
 	getImageHash,
 	timestamp2Date,
 	date2Timestamp,

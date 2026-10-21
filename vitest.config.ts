@@ -1,11 +1,9 @@
-import { defineWorkersConfig } from "@cloudflare/vitest-pool-workers/config";
+import { defineConfig } from "vitest/config";
 
-export default defineWorkersConfig({
-  test: {
-    poolOptions: {
-      workers: {
-        wrangler: { configPath: "./wrangler.toml" },
-      },
-    },
-  },
+// Scrapers are plain fetch + cheerio logic, so the node environment is enough.
+// The worker bundle itself is validated by `wrangler deploy --dry-run`.
+export default defineConfig({
+	test: {
+		environment: "node",
+	},
 });

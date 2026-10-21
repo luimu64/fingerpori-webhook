@@ -31,13 +31,18 @@ const doTasks = async (env: Env) => {
 		.filter((strip): strip is Strip => strip !== null);
 
 	for (const st of succeededStrips) {
-		const imageHash = await util.getImageHash(st.imageUrl);
-		const foundHash = await env.IMAGE_HASHES.get(imageHash);
+		try {
+			const imageHash = await util.getImageHash(st.imageUrl);
+			const foundHash = await env.IMAGE_HASHES.get(imageHash);
 
-		//check whether image has already been sent
-		if (foundHash === null) {
-			await util.sendToWebhook(st, env.WEBHOOK_URL);
-			await env.IMAGE_HASHES.put(imageHash, st.timestamp.toString());
+			//check whether image has already been sent
+			if (foundHash === null) {
+				await util.sendToWebhook(st, env.WEBHOOK_URL);
+				await env.IMAGE_HASHES.put(imageHash, st.timestamp.toString());
+			}
+		} catch (e) {
+			//one broken strip must not abort the remaining sources
+			console.error(`Failed to process ${st.source.name}:`, e);
 		}
 	}
 

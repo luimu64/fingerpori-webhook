@@ -7,8 +7,7 @@ export const fetchKaleva = async (source: Source) => {
 
 	const fetchRes = await fetch(source.url, {
 		headers: {
-			"User-Agent":
-				"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.3",
+			"User-Agent": util.browserUserAgent,
 		},
 	});
 
